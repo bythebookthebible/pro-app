@@ -1,42 +1,66 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, SectionList, Image, Pressable, Button, Platform } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, View, SectionList } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons'
 import {styles, colors} from './styles'
+import { useDispatch, useSelector } from 'react-redux';
+import { useFirestoreConnect } from 'react-redux-firebase';
+import { scriptureFromKey } from './util';
+import { setStartVerse } from './reducer'
 
 export const ContentSelector = React.forwardRef((props, ref) => {
   let [expanded, setExpanded] = useState(false)
-  let books = [
-    {title:"James", data: [1,2,3,4,5]},
-    {title:"Matthew", data: [5,6,7]},
-  ]
-  let [curBook, setCurBook] = useState(books[0].title)
-  let [curChapter, setCurChapter] = useState(books[0].data[0])
+  let dispatch = useDispatch()
 
-  if(expanded) {
-    return <SectionList
-      style={styles.selectBook}
-      sections={books}
-      keyExtractor={(item, index) => item + index}
-      renderItem={({item, section}) => 
-        <Text
-          style={styles.selectBookHeader}
-          onPress={() => {
-            setCurBook(section.title)
-            setCurChapter(item)
-            setExpanded(false)
-          }}
-        >{item}</Text>
-      }
-      renderSectionHeader={({ section: { title } }) => (
-        <Text style={styles.selectBookHeader}>{title}</Text>
-      )}
-    />
+  useFirestoreConnect([{collection:'memoryResources_02', storeAs:'memoryResources'}])
+  let resources = useSelector(state => state.firestore.data.memoryResources)
 
-  } else { // expanded == false
-    return <View style={styles.selectBook}>
-      <Text
-        onPress={() => {setExpanded(true)}}
-      >{`${curBook} ${curChapter}`}</Text>
-    </View>
+  let books = [{title: "Loading", data: []}]
+  if (resources) {
+    // filter only verses with music uploaded
+    resources = Object.fromEntries(Object.entries(resources).filter(([key, data]) => data.music))
+  
+    // format into subcatagories by book (formatted for SectionList)
+    books = Object.entries(resources)
+      .sort(([k1,v1], [k2,v2]) => k1 > v1)
+      .reduce( (books, [key, data]) => {
+        books[data.book] = books[data.book] || {title: data.book, data:[]}
+        let title = `${data.chapter}:${data.startVerse}-${data.endVerse}`
+        books[data.book].data.push({title, key})
+        return books
+      }, {})
+
+    books = Object.values(books)
   }
+
+  // keep current selection key in redux, but get all info for that key from resources
+  let curVerseKey = useSelector(state => state.content)
+  let curItem = resources && resources[curVerseKey]
+
+  let listForm = <SectionList
+    sections={books}
+    keyExtractor={(item, index) => item + index}
+    renderItem={({item, section}) => 
+      <Text
+        style={styles.contentChapterItem}
+        onPress={() => {
+          dispatch(setStartVerse(item.key))
+          setExpanded(false)
+        }}
+      >{item.title}</Text>
+    }
+    renderSectionHeader={({ section: { title } }) => (
+      <Text style={styles.contentBookHeader}>{title}</Text>
+    )}
+  />
+
+  let shortForm = <Text
+    style={styles.contentBookHeader}
+    onPress={() => {setExpanded(true)}}
+  >
+    {curItem ? `${curItem.book} ${curItem.chapter}` : 'Loading...'}
+  </Text>
+
+  return <View style={styles.contentSelector}>
+    {expanded ? listForm : shortForm}
+  </View>
 })

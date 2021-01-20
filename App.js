@@ -1,6 +1,6 @@
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Platform } from 'react-native';
+import { View } from 'react-native';
 
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 import { Provider } from 'react-redux'
@@ -56,21 +56,19 @@ const rrfProps = {
 export default function App(props) {
   return <Provider store={store}>
     <ReactReduxFirebaseProvider {...rrfProps}>
-      <View style={styles.container}>
-        <MyStatusBar backgroundColor={colors.lightBlue} barStyle="light-content" />
-        <View style={{...styles.container, ...styles.centerContents}}>
-          <ContentSelector />
-          <MediaPlayer />
-          <SettingSelector />
-        </View>
+      <View style={styles.outerContainer}>
+        <StatusBar translucent />
+        <ContentSelector />
+        <MediaPlayer />
+        <SettingSelector />
       </View>
     </ReactReduxFirebaseProvider>
   </Provider>
 }
 
-// renders phone status bar, and blocks that region of the screen
-function MyStatusBar({backgroundColor, ...props}) {
-  return <View style={[styles.statusBar, { backgroundColor }]}>
-    <StatusBar translucent backgroundColor={backgroundColor} {...props} />
-  </View>
-}
+// // renders phone status bar, and blocks that region of the screen
+// function MyStatusBar({backgroundColor, ...props}) {
+//   return <View style={[styles.statusBar, { backgroundColor }]}>
+//     <StatusBar translucent backgroundColor={backgroundColor} {...props} />
+//   </View>
+// }

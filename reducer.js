@@ -28,7 +28,7 @@ export default function createRootReducer() {
       blockSize: createReducer(1, {
         [setBlockSize]: (state, action) => action.payload
       }),
-      repeatCount: createReducer(3, {
+      repeatCount: createReducer(5, {
         [setRepeatCount]: (state, action) => action.payload
       }),
     }),

@@ -14,33 +14,59 @@ colors.secondary = colors.lightBlue;
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 40 : StatusBar.currentHeight;
 
 export const styles = StyleSheet.create({
-  statusBar: {
-    height: STATUSBAR_HEIGHT,
-  },
-  container: {
+  outerContainer: {
     flex: 1,
-    position: 'relative',
-  },
-  centerContents: {
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'stretch',
   },
-  text: {
-    fontSize: 15,
+
+  // content selector
+  contentSelector: {
+    paddingTop: STATUSBAR_HEIGHT,
+    alignSelf: 'stretch',
+    backgroundColor: colors.lightBlue,
   },
-  selectBook: {
-    top: 0,
-    width: '100%',
+  contentBookHeader: {
+    fontWeight: 'bold',
     textAlign: 'center',
-    backgroundColor: colors.lightBlue,
+    fontSize: 24,
   },
-  selectBookHeader: {
-    backgroundColor: colors.blue,
+  contentChapterItem: {
+    textAlign: 'center',
+    fontSize: 16,
   },
-  selectRepeat: {
-    textAlign: 'right',
+
+  // setting selector
+  settingSelector: {
+    flexDirection: 'row',
     justifyContent: 'flex-end',
-    alignSelf: 'flex-end',
+    padding: 10,
+  },
+  settingSelectorExpanded: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    padding: 10,
     backgroundColor: colors.lightBlue,
+  },
+  settingIcon: {
+    padding: 10,
+  },
+  listSelector: {
+    paddingHorizontal: 10,
+    height: 60,
+  },
+  listSelectorItem: {
+    height: 16,
+    fontSize: 16,
+  },
+  listSelectorTitle: {
+    paddingHorizontal: 10,
+    fontSize: 16,
+  },
+
+  // media player
+  mediaPlayer: {
+    alignItems: 'center',
   },
 });
