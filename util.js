@@ -182,11 +182,10 @@ export function mod(n, m) {
 
 export function valueAfter(arr, val, n=1, returnIndex=false) {
   for(let i in arr) {
-    i=Number(i) // apparently i is a string
     if(_.isEqual(arr[i], val)) {
-      i = mod((i+n), arr.length)
-      if(returnIndex) return i
-      return arr[i]
+      let j = mod((+i+n), arr.length)
+      if(returnIndex) return j
+      return arr[j]
     }
   }
   return arr[0]

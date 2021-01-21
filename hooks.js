@@ -4,7 +4,7 @@ import React, {useState, useEffect, useRef} from 'react'
 // import { diff, detailedDiff } from 'deep-object-diff'
 import _ from 'lodash'
 
-import {firebase, db, storage} from '../firebase'
+import {firebase, db, storage} from './firebase'
 import { useSelector } from 'react-redux'
 import { useFirestoreConnect } from 'react-redux-firebase'
 
@@ -134,149 +134,149 @@ function deepFilter(o, f) {
         }, {})
 }
 
-export function useIdbState(ref, onload) {
-    let [data, setData] = useState(undefined)
+// export function useIdbState(ref, onload) {
+//     let [data, setData] = useState(undefined)
 
-    // initial fetch from idb
-    useAsyncEffect(async abort => {
-        onload(data)
-    }, [])
+//     // initial fetch from idb
+//     useAsyncEffect(async abort => {
+//         onload(data)
+//     }, [])
     
-    // update function
-    function updateData(newData) {
-        console.log(diff(data, newData))
-        // go through the changed values, and upload to fb
-        // update data state
-        // do not update if not loaded yet
-    }
+//     // update function
+//     function updateData(newData) {
+//         console.log(diff(data, newData))
+//         // go through the changed values, and upload to fb
+//         // update data state
+//         // do not update if not loaded yet
+//     }
 
-    return [data, updateData]
-}
+//     return [data, updateData]
+// }
 
-const cacheName = 'btbtb'
-const cacheMetaStore = 'resources'
-let totalCacheSize = 0
-const maxCacheSize = 300*1024*1024 // safari warned "lots of energy" at 500MB, and "permission to store" at 1.2GB
-
-// resource object with {url: "", version: ""}
-export function useCachedStorage(resource) {
-    let [url, setUrl] = useState(undefined)
-    resource = resource || {}
-
-    useAsyncEffect(async abort => {
-        //console.log(caches, resource.url)
-
-        let freshlyCached = undefined
-
-        if(idb && resource.url) {
-            // let cache = await caches.open(cacheName)
-            idb = await idb
-            
-            let meta = await idb.get(cacheMetaStore, resource.url)
-            let res = await idb.transaction(cacheMetaStore).objectStore(cacheMetaStore).get(resource.url)
-            // update cache if needed (old or missing) but don't await
-            if((!res || !meta || !meta.version || resource.version > meta.version) && !abort) {
-                freshlyCached = preCacheStorage([resource])
-            }
-
-            // serve from cache if available
-            if(res) {
-                let blob = res.file
-                // console.log('using blob:', blob)
-                setUrl(URL.createObjectURL(blob))
-            } else {     
-                // console.log('using download url')
-                const downloadUrl = await storage.ref(resource.url).getDownloadURL().catch(e=>{
-                    console.log('error getting download url:', e)
-                    setUrl(undefined)
-                })
-                setUrl(downloadUrl)
-            }
-
-        } else {
-            if(resource.url) {
-                const downloadUrl = await storage.ref(resource.url).getDownloadURL().catch(e=>{
-                    console.log('error getting download url:', e)
-                    setUrl(undefined)
-                })
-                setUrl(downloadUrl)
-            }
-            if(!idb) {
-                console.warn('caching not supported')
-            }
-        }
-
-        // once the cached version exists, use it instead
-        freshlyCached = await freshlyCached
-        if(freshlyCached) {
-            setUrl(freshlyCached[0])
-            // console.log('now using blob', freshlyCached[0])
-        }
-
-    }, [resource.url, resource.version])
-    
-    return url
-}
-
-// let resourceDataStore = 'resource-data'
-// let cacheMetaStore = 'resource-meta'
-// deleteDB('btbtb')
-
-let idb = openDB('btbtb', 1, {
-    upgrade(db) {
-        // metadata and data blobs for video/pdf content
-        // let dataStore = db.createObjectStore(resourceDataStore, {keyPath: 'url'})
-        let metaStore = db.createObjectStore(cacheMetaStore, {keyPath: 'url'})
-        metaStore.createIndex('accessDate', 'accessDate')
-    },
-});
-
+// const cacheName = 'btbtb'
+// const cacheMetaStore = 'resources'
 // let totalCacheSize = 0
-// const maxCacheSize = 1<<9 // safari warned at 1.2G
+// const maxCacheSize = 300*1024*1024 // safari warned "lots of energy" at 500MB, and "permission to store" at 1.2GB
 
-export async function preCacheStorage(resources) {
-    // if(!caches) return
-    // let cache = await caches.open(cacheName)
-    // idb = await idb
+// // resource object with {url: "", version: ""}
+// export function useCachedStorage(resource) {
+//     let [url, setUrl] = useState(undefined)
+//     resource = resource || {}
 
-    let blobUrls = []
+//     useAsyncEffect(async abort => {
+//         //console.log(caches, resource.url)
 
-    for(let r of resources) {
-        let meta = await idb.count(cacheMetaStore, r.url).catch(e=>console.log(e))
+//         let freshlyCached = undefined
 
-        if(meta && meta.version && r.version <= meta.version) continue
-        // if(meta > 0) continue
-        if(!r.url) continue
+//         if(idb && resource.url) {
+//             // let cache = await caches.open(cacheName)
+//             idb = await idb
+            
+//             let meta = await idb.get(cacheMetaStore, resource.url)
+//             let res = await idb.transaction(cacheMetaStore).objectStore(cacheMetaStore).get(resource.url)
+//             // update cache if needed (old or missing) but don't await
+//             if((!res || !meta || !meta.version || resource.version > meta.version) && !abort) {
+//                 freshlyCached = preCacheStorage([resource])
+//             }
 
-        let downloadUrl = await storage.ref(r.url).getDownloadURL()
+//             // serve from cache if available
+//             if(res) {
+//                 let blob = res.file
+//                 // console.log('using blob:', blob)
+//                 setUrl(URL.createObjectURL(blob))
+//             } else {     
+//                 // console.log('using download url')
+//                 const downloadUrl = await storage.ref(resource.url).getDownloadURL().catch(e=>{
+//                     console.log('error getting download url:', e)
+//                     setUrl(undefined)
+//                 })
+//                 setUrl(downloadUrl)
+//             }
 
-        // cannot get without setting configuring CORS from gsutil with
-        // gsutil cors set cors.json gs://bythebookthebible.appspot.com
-        let res = await fetch(downloadUrl, {
-            method:'GET',
-            mode:'cors',
-            // credentials:'include',
-        })
-        let resBlob = await res.clone().blob()
+//         } else {
+//             if(resource.url) {
+//                 const downloadUrl = await storage.ref(resource.url).getDownloadURL().catch(e=>{
+//                     console.log('error getting download url:', e)
+//                     setUrl(undefined)
+//                 })
+//                 setUrl(downloadUrl)
+//             }
+//             if(!idb) {
+//                 console.warn('caching not supported')
+//             }
+//         }
 
-        idb.put(cacheMetaStore, {...r, file: resBlob, accessDate: Date.now(), size: resBlob.size})
-            // .then(()=>console.log('freshly cached', r))
-            .catch(e=>console.log('error in idb.put', e))
-        blobUrls.push(URL.createObjectURL(resBlob))
-    }
+//         // once the cached version exists, use it instead
+//         freshlyCached = await freshlyCached
+//         if(freshlyCached) {
+//             setUrl(freshlyCached[0])
+//             // console.log('now using blob', freshlyCached[0])
+//         }
 
-    totalCacheSize = 0
-    let tx = idb.transaction(cacheMetaStore, 'readwrite')
-    let cursor = await tx.store.index('accessDate').openCursor(null, 'prev')
-    while (cursor) {
-        totalCacheSize += cursor.value.size
-        if (totalCacheSize > maxCacheSize) {
-            totalCacheSize -= cursor.value.size
-            cursor.delete()
-        }
-        cursor = await cursor.continue()
-    }
-    console.log(totalCacheSize/1024/1024, 'MB cached')
+//     }, [resource.url, resource.version])
+    
+//     return url
+// }
 
-    return blobUrls
-}
+// // let resourceDataStore = 'resource-data'
+// // let cacheMetaStore = 'resource-meta'
+// // deleteDB('btbtb')
+
+// let idb = openDB('btbtb', 1, {
+//     upgrade(db) {
+//         // metadata and data blobs for video/pdf content
+//         // let dataStore = db.createObjectStore(resourceDataStore, {keyPath: 'url'})
+//         let metaStore = db.createObjectStore(cacheMetaStore, {keyPath: 'url'})
+//         metaStore.createIndex('accessDate', 'accessDate')
+//     },
+// });
+
+// // let totalCacheSize = 0
+// // const maxCacheSize = 1<<9 // safari warned at 1.2G
+
+// export async function preCacheStorage(resources) {
+//     // if(!caches) return
+//     // let cache = await caches.open(cacheName)
+//     // idb = await idb
+
+//     let blobUrls = []
+
+//     for(let r of resources) {
+//         let meta = await idb.count(cacheMetaStore, r.url).catch(e=>console.log(e))
+
+//         if(meta && meta.version && r.version <= meta.version) continue
+//         // if(meta > 0) continue
+//         if(!r.url) continue
+
+//         let downloadUrl = await storage.ref(r.url).getDownloadURL()
+
+//         // cannot get without setting configuring CORS from gsutil with
+//         // gsutil cors set cors.json gs://bythebookthebible.appspot.com
+//         let res = await fetch(downloadUrl, {
+//             method:'GET',
+//             mode:'cors',
+//             // credentials:'include',
+//         })
+//         let resBlob = await res.clone().blob()
+
+//         idb.put(cacheMetaStore, {...r, file: resBlob, accessDate: Date.now(), size: resBlob.size})
+//             // .then(()=>console.log('freshly cached', r))
+//             .catch(e=>console.log('error in idb.put', e))
+//         blobUrls.push(URL.createObjectURL(resBlob))
+//     }
+
+//     totalCacheSize = 0
+//     let tx = idb.transaction(cacheMetaStore, 'readwrite')
+//     let cursor = await tx.store.index('accessDate').openCursor(null, 'prev')
+//     while (cursor) {
+//         totalCacheSize += cursor.value.size
+//         if (totalCacheSize > maxCacheSize) {
+//             totalCacheSize -= cursor.value.size
+//             cursor.delete()
+//         }
+//         cursor = await cursor.continue()
+//     }
+//     console.log(totalCacheSize/1024/1024, 'MB cached')
+
+//     return blobUrls
+// }

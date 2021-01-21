@@ -59,7 +59,6 @@ function ListSelector({data, renderItem, onPress, selected, ...props}) {
   // scroll so selected position is visible
   let itemHeight = styles.listSelectorItem.height
   useEffect(() => {
-    console.log('scrolling list', Math.max(0, (_.indexOf(data, selected))))
     listRef.current && 
     listRef.current.scrollToIndex({
       animated: true, 
