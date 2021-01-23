@@ -3,9 +3,14 @@ import { firestoreReducer } from 'redux-firestore'
 import { firebaseReducer } from 'react-redux-firebase'
 import { valueAfter } from './util'
 
-export const setStartVerse = createAction('SET_START_VERSE')
 export const setBlockSize = createAction('SET_BLOCK_SIZE')
 export const setRepeatCount = createAction('SET_REPEAT_COUNT')
+
+export const setStartVerse = createAsyncThunk('SET_START_VERSE', (key, thunk) => {
+  // settings.blockUnitSize needed for player reducer
+  let settings = thunk.getState().settings
+  return {key, settings}
+})
 
 export const nextBlock = createAsyncThunk('PLAYER/NEXT_BLOCK', (arg, thunk) => {
   let state = thunk.getState()
@@ -14,8 +19,10 @@ export const nextBlock = createAsyncThunk('PLAYER/NEXT_BLOCK', (arg, thunk) => {
   let curItem = getCurrentModule(state)
   let measuresInModule = Math.floor(curItem.length / 60 * curItem.bpm)
 
-  return {settings, measuresInModule, arg}
+  return {settings, measuresInModule, ...arg}
 })
+
+const defaultBlockUnitSize = 1
 
 export function getCurrentModule(state) {
   let resources = state.firestore.data.memoryResources
@@ -25,24 +32,27 @@ export function getCurrentModule(state) {
     .filter( ([key, data]) => data.music )
     .map( ([key, data]) => key )
 
-  let curItem = resources[valueAfter(musicKeys, state.content, state.playerIndex.blockOffset.module + state.playerIndex.moduleIndex)]
+  let curItem = resources[valueAfter(musicKeys, state.content, state.repetition.blockOffset.module + state.repetition.moduleIndex)]
   return curItem
 }
 
-// Add firebase to reducers
 export default function createRootReducer() {
   return combineReducers({
+    // Add firebase to reducers
     firebase: firebaseReducer,
-    firestore: firestoreReducer, // <- needed if using firestore
+    firestore: firestoreReducer, // firestore is seperate
 
     // content selector
     content: createReducer('18-001-001-006', { // default starting module
-      [setStartVerse]: (state, action) => action.payload
+      [setStartVerse.fulfilled]: (state, action) => {
+        console.log(action)
+        return action.payload.key
+      }
     }),
 
     // settings selector
     settings: combineReducers({
-      blockUnitSize: createReducer(1, {
+      blockUnitSize: createReducer(defaultBlockUnitSize, {
         [setBlockSize]: (state, action) => action.payload
       }),
       blockRepeatCount: createReducer(5, {
@@ -51,60 +61,88 @@ export default function createRootReducer() {
     }),
 
     // media player
-    playerIndex: createReducer({
-      blockLength: {measure: 1, module: 0},
-      blockOffset: {measure: 0, module: 0},
+    repetition: repetitionReducer,
+  })
+}
+
+const repetitionReducer = createReducer({
+  blockLength: {measure: defaultBlockUnitSize, module: 0},
+  blockOffset: {measure: 0, module: 0},
+  moduleIndex: 0,
+  repeatIndex: 0,
+}, {
+  [setStartVerse.fulfilled]: (state, action) => {
+    console.log(action)
+    return {
+      blockLength: {module: 0, measure: action.payload.settings.blockUnitSize},
+      blockOffset: {module: 0, measure: 0},
       moduleIndex: 0,
       repeatIndex: 0,
-    }, {
-      [nextBlock.fulfilled]: (state, action) => {
-        let {blockLength, blockOffset, moduleIndex, repeatIndex} = state
-        let {settings, measuresInModule} = action.payload
+    }
+  },
+  [setBlockSize]: (state, action) => {
+    // keep offsets
+    // round lengths to multiple of new block size
+    let size = action.payload
+    let m = state.blockLength.measure
+    state.blockLength.measure = Math.max(size, Math.floor(m/size)*size)
+    return state
+  },
+  [setRepeatCount]: (state, action) => {
+    let {repeatIndex} = state
+    let newBlockRepeatCount = action.payload
 
-        // cycle module index
-        moduleIndex++
-        if(blockLength.module > 1 && moduleIndex < blockLength.module) {
-          return {blockLength, blockOffset, moduleIndex, repeatIndex}
-        }
-        moduleIndex = 0
+    // refresh repeat index
+    if(repeatIndex >= newBlockRepeatCount) {
+      repeatIndex = 0
+    }
+    return {...state, repeatIndex}
+  },
+  [nextBlock.fulfilled]: (state, action) => {
+    let {blockLength, blockOffset, moduleIndex, repeatIndex} = state
+    let {settings, measuresInModule} = action.payload
 
-        // cycle repeat index
-        repeatIndex++
-        if(repeatIndex < settings.blockRepeatCount) {
-          return {blockLength, blockOffset, moduleIndex, repeatIndex}
-        }
-        repeatIndex = 0
+    // cycle module index
+    moduleIndex++
+    if(blockLength.module > 1 && moduleIndex < blockLength.module) {
+      return {blockLength, blockOffset, moduleIndex, repeatIndex}
+    }
+    moduleIndex = 0
 
-        // cycle block index
-        let L = blockLength.measure
-        let O = blockOffset.measure
-        let LM = blockLength.module
-        let OM = blockOffset.module
+    // cycle repeat index
+    repeatIndex++
+    if(repeatIndex < settings.blockRepeatCount) {
+      return {blockLength, blockOffset, moduleIndex, repeatIndex}
+    }
+    repeatIndex = 0
 
-        if( !( LM  
-            ?  (OM + LM) % (2 * LM) == 0  
-            :  (O + L) % (2 * L) == 0)
-          && O+L < measuresInModule
-        ) {
-          // new material (smallest interval immediately after current one)
-          blockOffset = {measure: O + L, module: OM + LM}
-          blockLength = {measure: 1, module: 0}
-          return {blockLength, blockOffset, moduleIndex, repeatIndex}
-        }
+    // cycle block index
+    let L = blockLength.measure
+    let O = blockOffset.measure
+    let LM = blockLength.module
+    let OM = blockOffset.module
 
-        if(2*L < measuresInModule) {
-          // review (double interval size, end time fixed)
-          blockOffset = {measure: O - L, module: OM - LM}
-          blockLength = {measure: 2 * L, module: 2 * LM}
-          return {blockLength, blockOffset, moduleIndex, repeatIndex}
-        }
+    if( !( LM
+        ?  (OM + LM) % (2 * LM) == 0  
+        :  (O + L) % (2 * L) == 0)
+      && O+L < measuresInModule
+    ) {
+      // new material (smallest interval immediately after current one)
+      blockOffset = {measure: O + L, module: OM + LM}
+      blockLength = {measure: settings.blockUnitSize, module: 0}
+      return {blockLength, blockOffset, moduleIndex, repeatIndex}
+    }
 
-        // review (interval expands to full module)
-        blockOffset = {measure: 0, module: OM + LM}
-        blockLength = {measure: 0, module: 1}
-        return {blockLength, blockOffset, moduleIndex, repeatIndex}
-      },
-    }),
+    if(2*L < measuresInModule) {
+      // review (double interval size, end time fixed)
+      blockOffset = {measure: O - L, module: OM - LM}
+      blockLength = {measure: 2 * L, module: 2 * LM}
+      return {blockLength, blockOffset, moduleIndex, repeatIndex}
+    }
 
-  })
-} 
+    // review (interval expands to full module)
+    blockOffset = {measure: 0, module: OM + LM}
+    blockLength = {measure: 0, module: 1}
+    return {blockLength, blockOffset, moduleIndex, repeatIndex}
+  },
+})

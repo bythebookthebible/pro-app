@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react'
 // import {openDB, deleteDB} from 'idb'
 // import deepEqual from 'deep-equal'
 // import { diff, detailedDiff } from 'deep-object-diff'
-import _ from 'lodash'
+import _, { isFunction } from 'lodash'
 
 import {firebase, db, storage} from './firebase'
 import { useSelector } from 'react-redux'
@@ -18,8 +18,11 @@ export function useMemoryResources(selector = resources=>resources) {
 export function useAsyncEffect(fn=()=>undefined, deps=[]) {
     let abort = useRef(false)
     useEffect(() => {
-        fn(abort)
-        return ()=>abort.current=true
+        let cleanup = fn(abort)
+        return () => {
+            abort.current=true
+            isFunction(cleanup) && cleanup()
+        }
     }, deps)
 }
 

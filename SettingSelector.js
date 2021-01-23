@@ -25,8 +25,8 @@ export const SettingSelector = React.forwardRef((props, ref) => {
   let size = useSelector(state => state.settings.blockSize)
   let count = useSelector(state => state.settings.repeatCount)
   
-  let sizeOptions = [1, 2, 3, 4, 5, 6, 7, 8]
-  let countOptions = [1, 2, 3, 4, 5, 6, 7, 8]
+  let sizeOptions = [1, 2, 3, 4, 6, 8]
+  let countOptions = [1, 2, 3, 4, 6, 8]
 
   if(expanded) return <View style={styles.settingSelectorExpanded}>
     <Text style={styles.listSelectorTitle}>Block Size:</Text>
