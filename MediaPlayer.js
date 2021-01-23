@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useWindowDimensions, View } from 'react-native';
+import { Pressable, useWindowDimensions, View } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons'
 import { Svg, Path } from 'react-native-svg';
 import { styles, colors } from './styles'
@@ -30,8 +30,6 @@ export function MediaPlayer(props) {
     }
   }, [curItem && curItem.music[0]])
 
-  console.log('url', url)
-
   // cur indices 
   let {blockLength, blockOffset, moduleIndex, repeatIndex } = useSelector(state => state.repetition)
   let L = blockLength.measure
@@ -56,15 +54,11 @@ export function MediaPlayer(props) {
       {uri: url}, // source
       { // initialStatus
         progressUpdateIntervalMillis: measureTime.current,
-        // positionMillis: 0,
-        // shouldPlay: false,
-        // rate: 1.0,
       },
       (status) => { // onPlaybackStatusUpdate
         soundStatus.current = status
         if(status.positionMillis >= endTime.current || status.didJustFinish) {
           dispatch(nextBlock())
-          console.log('nextBlock', status)
         }
       },
       true // downloadFirst
@@ -76,7 +70,6 @@ export function MediaPlayer(props) {
   React.useEffect(() => {
     return sound
       ? () => {
-          console.log('Unloading Sound');
           sound.unloadAsync(); }
       : undefined;
   }, [sound]);
@@ -85,7 +78,6 @@ export function MediaPlayer(props) {
   useEffect(() => {
     if(soundStatus.current.isLoaded && url) {
       sound.setPositionAsync(startTime.current)
-      console.log('seeking:', startTime.current)
     }
     // must trigger on moduleIndex, repeatIndex changes also
   }, [soundStatus, url, L, O, moduleIndex, repeatIndex])
@@ -94,31 +86,33 @@ export function MediaPlayer(props) {
 
   return <>
     <View style={styles.mediaPlayer}>
-      <FontAwesome
-        name={paused ? "play" : "pause"}
-        style={{marginTop:-40, marginBottom:-40}}
-        size={80} color={colors.text}
-        onPress={() => {
-          let p = !paused
-          if(sound) {
-            if(p) sound.pauseAsync()
-            else sound.playAsync()
-          }
-          setPaused(p)
-        }}   
-      />
+      <Pressable onPress={() => {
+        let p = !paused
+        if(sound) {
+          if(p) sound.pauseAsync()
+          else sound.playAsync()
+        }
+        setPaused(p)
+      }}>
+        <View style={styles.playCircle}>
+          <FontAwesome name={paused ? "play" : "pause"}
+            style={{marginTop:-25, marginBottom:-25, marginLeft: (paused ? 11 : 0)}}
+            size={50} color={colors.primary} />
+        </View>
+      </Pressable>
       <Waves />
     </View>
   </>
 }
 
-function Wave({wavelength, amplitude, offsetX, offsetY, maxX, ...props}) {
+function Wave({wavelength, amplitude, offsetX, offsetY, speed, maxX, ...props}) {
   const p = 0.3642 // guide point (fraction of quarter wave)
   let w = wavelength ? wavelength/2 : 1
   let a = amplitude ? amplitude/2 : 1
   let x = offsetX || 0
   let y = offsetY || 0
-  let count = Math.ceil((maxX - x) / w)
+  while(x > -2*w) x -= 2*w // give room in -x for movement
+  let count = Math.ceil((maxX - x) / w) + 2 // +2 to give room in +x for movement
 
   let d = `M ${x} ${y}`
   for(let i=0; i < count; i+=2) {
@@ -126,7 +120,11 @@ function Wave({wavelength, amplitude, offsetX, offsetY, maxX, ...props}) {
         C ${w*(i+1+p)+x} ${y+a} ${w*(i+2-p)+x} ${y-a} ${w*(i+2)+x} ${y-a}`
   }
 
-  return <Path d={d} stroke={colors.pink} strokeWidth="0.2" fill='none' {...props} />
+  return <Path d={d} stroke={colors.primary} strokeWidth="0.2" fill='none' {...props} >
+    {speed && <animateTransform attributeName="transform" attributeType="XML"
+      type="translate" from={`0 0`} to={`${Math.sign(speed)*2*w} 0`}
+      dur={`${2*w/Math.abs(speed)}s`} repeatCount="indefinite" />}
+  </Path>
 }
 
 function Waves(props) {
@@ -134,18 +132,18 @@ function Waves(props) {
   const aspect = 2
 
   return <View {...props} style={{
-      zIndex: -10, pointerEvents: 'none',
+      zIndex: -1, pointerEvents: 'none',
       width: width, height: width / aspect, 
       marginTop: -width / aspect / 2,
       marginBottom: -width / aspect / 2,
     }}>
     <Svg viewBox={`0 -1 ${2*aspect} 2`} >
-      <Wave amplitude={1} wavelength={5} offsetX={-1} maxX={2*aspect} 
-        stroke={'#f008'} strokeWidth="0.2" />
-      <Wave amplitude={1.2} wavelength={3} offsetX={-1} maxX={2*aspect} 
-        stroke={'#ff08'} strokeWidth="0.18" />
-      <Wave amplitude={.5} wavelength={2} offsetX={-1} maxX={2*aspect} 
-        stroke={'#49f8'} strokeWidth="0.14" />
+      <Wave amplitude={.7} wavelength={5} offsetX={2} offsetY={0} speed={.5}
+      maxX={2*aspect} stroke={'#e056'} strokeWidth="0.2" />
+      <Wave amplitude={.6} wavelength={3} offsetX={2} offsetY={-.1} speed={-.4}
+      maxX={2*aspect} stroke={'#ff08'} strokeWidth="0.3" />
+      <Wave amplitude={.4} wavelength={2} offsetX={2} offsetY={.25} speed={.15}
+      maxX={2*aspect} stroke={'#3cbfef80'} strokeWidth="0.14" />
     </Svg>
   </View>
 }

@@ -22,14 +22,14 @@ export const SettingSelector = React.forwardRef((props, ref) => {
   let [expanded, setExpanded] = useState(false)
 
   let dispatch = useDispatch()
-  let size = useSelector(state => state.settings.blockSize)
-  let count = useSelector(state => state.settings.repeatCount)
+  let size = useSelector(state => state.settings.blockUnitSize)
+  let count = useSelector(state => state.settings.blockRepeatCount)
   
   let sizeOptions = [1, 2, 3, 4, 6, 8]
   let countOptions = [1, 2, 3, 4, 6, 8]
 
   if(expanded) return <View style={styles.settingSelectorExpanded}>
-    <Text style={styles.listSelectorTitle}>Block Size:</Text>
+    <Text style={styles.titleText}>Section Size:</Text>
     <ListSelector
       data={sizeOptions}
       keyExtractor={(item) => item}
@@ -37,7 +37,7 @@ export const SettingSelector = React.forwardRef((props, ref) => {
       onPress={size => dispatch(setBlockSize(size))}
     />
 
-    <Text style={styles.listSelectorTitle}>Repeat Count:</Text>
+    <Text style={styles.titleText}>Repeat Section:</Text>
     <ListSelector
       data={countOptions}
       keyExtractor={(item) => item}
@@ -45,11 +45,13 @@ export const SettingSelector = React.forwardRef((props, ref) => {
       onPress={count => dispatch(setRepeatCount(count))}
     />
 
-    <FontAwesome style={styles.settingIcon} name="gear" size={40} color={colors.text} onPress={() => {setExpanded(p => !p)}} />
+    <FontAwesome style={styles.settingIcon} name="gear" size={40}
+    color={colors.lightBlue} onPress={() => {setExpanded(p => !p)}} />
   </View>
 
   else return <View style={styles.settingSelector}>
-    <FontAwesome style={styles.settingIcon} name="gear" size={40} color={colors.text} onPress={() => {setExpanded(p => !p)}} />
+    <FontAwesome style={styles.settingIcon} name="gear" size={40}
+    color={colors.lightBlue} onPress={() => {setExpanded(p => !p)}} />
   </View>
 })
 
@@ -57,7 +59,7 @@ function ListSelector({data, renderItem, onPress, selected, ...props}) {
   let listRef = useRef()
 
   // scroll so selected position is visible
-  let itemHeight = styles.listSelectorItem.height
+  let itemHeight = styles.text.fontSize
   useEffect(() => {
     listRef.current && 
     listRef.current.scrollToIndex({
@@ -68,18 +70,18 @@ function ListSelector({data, renderItem, onPress, selected, ...props}) {
   }, [listRef])
 
   function renderItem({ item, index, separators }) {
-        return <TouchableOpacity
-          onPress={() => onPress && onPress(item, index)}
-          onShowUnderlay={separators.highlight}
-          onHideUnderlay={separators.unhighlight}
-          activeOpacity={.6}
-          style={{opacity: (item == selected ? 1 : .2)}}
-        >
-          <View>
-            <Text style={styles.listSelectorItem}>{String(item)}</Text>
-          </View>
-        </TouchableOpacity>
-      }
+    return <TouchableOpacity
+      onPress={() => onPress && onPress(item, index)}
+      onShowUnderlay={separators.highlight}
+      onHideUnderlay={separators.unhighlight}
+      activeOpacity={.6}
+      style={{opacity: (item == selected ? 1 : .2)}}
+    >
+      <View>
+        <Text style={styles.text}>{String(item)}</Text>
+      </View>
+    </TouchableOpacity>
+  }
 
   return <View style={styles.listSelector}>
     <FlatList {...props}

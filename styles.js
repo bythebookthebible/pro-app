@@ -4,12 +4,11 @@ import { StatusBar } from 'expo-status-bar';
 export const colors = {
   pink: '#f88',
   yellow: '#ff0',
-  lightBlue: '#49f',
-  blue: '#37f',
+  lightBlue: '#3cbfef',
   text: 'black',
+  background: '#f4f4f4',
 }
-colors.primary = colors.blue;
-colors.secondary = colors.lightBlue;
+colors.primary = colors.lightBlue;
 
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 40 : StatusBar.currentHeight;
 
@@ -18,22 +17,26 @@ export const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'stretch',
+    backgroundColor: colors.background,
+  },
+
+  text: {
+    fontFamily: 'Helvetica-Light',
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  titleText: {
+    fontFamily: 'Helvetica',
+    textAlign: 'center',
+    fontWeight: 'bold',
+    fontSize: 24,
   },
 
   // content selector
   contentSelector: {
     paddingTop: STATUSBAR_HEIGHT,
     alignSelf: 'stretch',
-    backgroundColor: colors.lightBlue,
-  },
-  contentBookHeader: {
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontSize: 24,
-  },
-  contentChapterItem: {
-    textAlign: 'center',
-    fontSize: 16,
+    backgroundColor: 'white',
   },
 
   // setting selector
@@ -47,7 +50,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     padding: 10,
-    backgroundColor: colors.lightBlue,
+    backgroundColor: 'white',
   },
   settingIcon: {
     padding: 10,
@@ -56,17 +59,17 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 10,
     height: 60,
   },
-  listSelectorItem: {
-    height: 16,
-    fontSize: 16,
-  },
-  listSelectorTitle: {
-    paddingHorizontal: 10,
-    fontSize: 16,
-  },
 
   // media player
   mediaPlayer: {
+    alignItems: 'center',
+  },
+  playCircle: {
+    backgroundColor: '#fffc', 
+    width:120, height:120,
+    borderRadius: 60,
+    marginTop:-60, marginBottom:-60,
+    paddingVertical:60,
     alignItems: 'center',
   },
 });

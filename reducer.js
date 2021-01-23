@@ -22,7 +22,7 @@ export const nextBlock = createAsyncThunk('PLAYER/NEXT_BLOCK', (arg, thunk) => {
   return {settings, measuresInModule, ...arg}
 })
 
-const defaultBlockUnitSize = 1
+const defaultBlockUnitSize = 3
 
 export function getCurrentModule(state) {
   let resources = state.firestore.data.memoryResources
@@ -55,7 +55,7 @@ export default function createRootReducer() {
       blockUnitSize: createReducer(defaultBlockUnitSize, {
         [setBlockSize]: (state, action) => action.payload
       }),
-      blockRepeatCount: createReducer(5, {
+      blockRepeatCount: createReducer(3, {
         [setRepeatCount]: (state, action) => action.payload
       }),
     }),

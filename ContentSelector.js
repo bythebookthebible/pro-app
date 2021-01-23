@@ -5,7 +5,7 @@ import {styles, colors} from './styles'
 import { useDispatch, useSelector } from 'react-redux';
 import { useFirestoreConnect } from 'react-redux-firebase';
 import { scriptureFromKey } from './util';
-import { setStartVerse } from './reducer'
+import { getCurrentModule, setStartVerse } from './reducer'
 
 export const ContentSelector = React.forwardRef((props, ref) => {
   let [expanded, setExpanded] = useState(false)
@@ -33,15 +33,15 @@ export const ContentSelector = React.forwardRef((props, ref) => {
   }
 
   // keep current selection key in redux, but get all info for that key from resources
-  let curVerseKey = useSelector(state => state.content)
-  let curItem = resources && resources[curVerseKey]
+  // display curItem == currently playing module not currently selected module
+  let curItem = useSelector( state => getCurrentModule(state))
 
   let listForm = <SectionList
     sections={books}
     keyExtractor={(item, index) => item + index}
     renderItem={({item, section}) => 
       <Text
-        style={styles.contentChapterItem}
+        style={styles.text}
         onPress={() => {
           dispatch(setStartVerse(item.key))
           setExpanded(false)
@@ -49,15 +49,15 @@ export const ContentSelector = React.forwardRef((props, ref) => {
       >{item.title}</Text>
     }
     renderSectionHeader={({ section: { title } }) => (
-      <Text style={styles.contentBookHeader}>{title}</Text>
+      <Text style={styles.titleText}>{title}</Text>
     )}
   />
 
   let shortForm = <Text
-    style={styles.contentBookHeader}
+    style={styles.titleText}
     onPress={() => {setExpanded(true)}}
   >
-    {curItem ? `${curItem.book} ${curItem.chapter}` : 'Loading...'}
+    { curItem ? `${curItem.book} ${curItem.chapter}:${curItem.startVerse}-${curItem.endVerse}` : '' }
   </Text>
 
   return <View style={styles.contentSelector}>
