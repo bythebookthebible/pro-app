@@ -33,10 +33,42 @@ export const styles = StyleSheet.create({
   },
 
   // content selector
-  contentSelector: {
-    paddingTop: STATUSBAR_HEIGHT,
+  contentTitle: {
+    paddingTop: 20 + !!STATUSBAR_HEIGHT,
+    paddingBottom: 20,
     alignSelf: 'stretch',
     backgroundColor: 'white',
+  },
+  contentSelector: {
+    position: 'absolute',
+    top: 0, bottom: 0, 
+    width: '100%', maxWidth: 400,
+    paddingTop: 15,
+    zIndex: 1,
+    backgroundColor: 'white',
+    borderColor: '#0002',
+    borderRightWidth: 1.5,
+  },
+  listTitle: {
+    fontFamily: 'Helvetica',
+    textAlign: 'left',
+    fontWeight: 'bold',
+    fontSize: 24,
+  },
+  listEntry: {
+    fontFamily: 'Helvetica',
+    textAlign: 'left',
+    fontSize: 24,
+  },
+  listRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 30,
+  },
+  listSpacer: {
+    marginVertical: 15,
+    height: 6,
   },
 
   // setting selector

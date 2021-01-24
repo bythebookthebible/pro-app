@@ -114,10 +114,10 @@ function Wave({wavelength, amplitude, offsetX, offsetY, speed, maxX, ...props}) 
   while(x > -2*w) x -= 2*w // give room in -x for movement
   let count = Math.ceil((maxX - x) / w) + 2 // +2 to give room in +x for movement
 
-  let d = `M ${x} ${y}`
+  let d = `M ${x} ${y} `
   for(let i=0; i < count; i+=2) {
-    d += `C ${w*(i+p)+x} ${y-a} ${w*(i+1-p)+x} ${y+a} ${w*(i+1)+x} ${y+a}
-        C ${w*(i+1+p)+x} ${y+a} ${w*(i+2-p)+x} ${y-a} ${w*(i+2)+x} ${y-a}`
+    d += `C ${w*(i+p)+x} ${y-a} ${w*(i+1-p)+x} ${y+a} ${w*(i+1)+x} ${y+a} `
+      + `C ${w*(i+1+p)+x} ${y+a} ${w*(i+2-p)+x} ${y-a} ${w*(i+2)+x} ${y-a} `
   }
 
   return <Path d={d} stroke={colors.primary} strokeWidth="0.2" fill='none' {...props} >
