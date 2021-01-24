@@ -10,7 +10,7 @@ import NestedListView, {NestedRow} from 'react-native-nested-listview'
 import spacer from './spacer.svg'
 
 export const ContentSelector = React.forwardRef((props, ref) => {
-  let [expanded, setExpanded] = useState(true)
+  let [expanded, setExpanded] = useState(false)
   let dispatch = useDispatch()
 
   useFirestoreConnect([{collection:'memoryResources_02', storeAs:'memoryResources'}])
@@ -52,10 +52,11 @@ export const ContentSelector = React.forwardRef((props, ref) => {
   // keep current selection key in redux, but get all info for that key from resources
   // display curItem == currently playing module not currently selected module
   let curItem = useSelector( state => getCurrentModule(state))
-
+  
   let selectorList = <View style={[styles.contentSelector, {left: expanded ? 0 : '-100%'}]}>
     <NestedListView 
       data={data}
+      extraData={curItem && curItem.key}
       getChildrenName={() => 'items'}
       onNodePressed={(node) => {
         if(node.value) {
@@ -64,7 +65,8 @@ export const ContentSelector = React.forwardRef((props, ref) => {
         }
       }}
       renderNode={(node, level) => (<View>
-        <NestedRow level={level} paddingLeftIncrement={30}>
+        <NestedRow level={level} paddingLeftIncrement={30} style={curItem && node.value == curItem.key
+            ? {backgroundColor: colors.lightBlue} : {}}>
           <View style={styles.listRow}>
             <Text style={level == 1 ? styles.listTitle : styles.listEntry}>
               {node.title}
@@ -80,24 +82,6 @@ export const ContentSelector = React.forwardRef((props, ref) => {
       </View>)}
     />
   </View>
-
-  // let selectorList = <SectionList
-  //   style={[styles.ContentSelector, {left: expanded ? 0 : '-100%'}]}
-  //   sections={books}
-  //   keyExtractor={(item, index) => item + index}
-  //   renderItem={({item, section}) => 
-  //     <Text
-  //       style={styles.text}
-  //       onPress={() => {
-  //         dispatch(setStartVerse(item.key))
-  //         setExpanded(false)
-  //       }}
-  //     >{item.title}</Text>
-  //   }
-  //   renderSectionHeader={({ section: { title } }) => (
-  //     <Text style={styles.titleText}>{title}</Text>
-  //   )}
-  // />
 
   let title = <Pressable onPress={() => {setExpanded(e => !e)}}>
     <View style={styles.contentTitle}>

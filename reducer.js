@@ -32,8 +32,8 @@ export function getCurrentModule(state) {
     .filter( ([key, data]) => data.music )
     .map( ([key, data]) => key )
 
-  let curItem = resources[valueAfter(musicKeys, state.content, state.repetition.blockOffset.module + state.repetition.moduleIndex)]
-  return curItem
+  let key = valueAfter(musicKeys, state.content, state.repetition.blockOffset.module + state.repetition.moduleIndex)
+  return {...resources[key], key}
 }
 
 export default function createRootReducer() {

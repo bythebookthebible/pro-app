@@ -34,17 +34,17 @@ export const styles = StyleSheet.create({
 
   // content selector
   contentTitle: {
-    paddingTop: 20 + !!STATUSBAR_HEIGHT,
+    paddingTop: 20 + (STATUSBAR_HEIGHT || 0),
     paddingBottom: 20,
     alignSelf: 'stretch',
     backgroundColor: 'white',
   },
   contentSelector: {
     position: 'absolute',
-    top: 0, bottom: 0, 
+    top: 0, bottom: 0,
+    paddingTop: STATUSBAR_HEIGHT || 0,
     width: '100%', maxWidth: 400,
-    paddingTop: 15,
-    zIndex: 1,
+    zIndex: 10,
     backgroundColor: 'white',
     borderColor: '#0002',
     borderRightWidth: 1.5,
@@ -65,10 +65,11 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingRight: 30,
+    paddingVertical: 15,
   },
   listSpacer: {
-    marginVertical: 15,
     height: 6,
+    marginVertical: -3,
   },
 
   // setting selector
@@ -79,17 +80,28 @@ export const styles = StyleSheet.create({
   },
   settingSelectorExpanded: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    flexWrap: 'wrap',
     padding: 10,
+    paddingRight: 80,
+    minHeight: 100,
     backgroundColor: 'white',
   },
-  settingIcon: {
-    padding: 10,
+  settingItem: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   listSelector: {
-    paddingHorizontal: 10,
     height: 60,
+  },
+  settingListItem: {
+    paddingHorizontal: 30,
+  },
+  settingIcon: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
   },
 
   // media player

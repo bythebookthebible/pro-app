@@ -138,12 +138,12 @@ function Waves(props) {
       marginBottom: -width / aspect / 2,
     }}>
     <Svg viewBox={`0 -1 ${2*aspect} 2`} >
-      <Wave amplitude={.7} wavelength={5} offsetX={2} offsetY={0} speed={.5}
-      maxX={2*aspect} stroke={'#e056'} strokeWidth="0.2" />
-      <Wave amplitude={.6} wavelength={3} offsetX={2} offsetY={-.1} speed={-.4}
+      <Wave amplitude={.7} wavelength={5} offsetX={-2} offsetY={0} speed={.5}
+      maxX={2*aspect} stroke={'#e056'} strokeWidth="0.15" />
+      <Wave amplitude={.6} wavelength={3} offsetX={-2} offsetY={-.1} speed={-.4}
       maxX={2*aspect} stroke={'#ff08'} strokeWidth="0.3" />
-      <Wave amplitude={.4} wavelength={2} offsetX={2} offsetY={.25} speed={.15}
-      maxX={2*aspect} stroke={'#3cbfef80'} strokeWidth="0.14" />
+      <Wave amplitude={.3} wavelength={2} offsetX={-2} offsetY={.25} speed={.15}
+      maxX={2*aspect} stroke={'#3cbfef80'} strokeWidth="0.1" />
     </Svg>
   </View>
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { Text, View, FlatList, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons'
 import {styles, colors} from './styles'
 import { useDispatch, useSelector } from "react-redux";
@@ -24,33 +24,39 @@ export const SettingSelector = React.forwardRef((props, ref) => {
   let dispatch = useDispatch()
   let size = useSelector(state => state.settings.blockUnitSize)
   let count = useSelector(state => state.settings.blockRepeatCount)
-  
+  let {width} = useWindowDimensions()
+
   let sizeOptions = [1, 2, 3, 4, 6, 8]
   let countOptions = [1, 2, 3, 4, 6, 8]
 
-  if(expanded) return <View style={styles.settingSelectorExpanded}>
-    <Text style={styles.titleText}>Section Size:</Text>
-    <ListSelector
-      data={sizeOptions}
-      keyExtractor={(item) => item}
-      selected={size}
-      onPress={size => dispatch(setBlockSize(size))}
-    />
+  if(expanded) return <View style={[styles.settingSelectorExpanded,
+    {justifyContent: width < 600 ? 'flex-start' : 'flex-end'}]}>
+    <View style={styles.settingItem}>
+      <Text style={styles.titleText}>Section Size:</Text>
+      <ListSelector
+        data={sizeOptions}
+        keyExtractor={(item) => item}
+        selected={size}
+        onPress={size => dispatch(setBlockSize(size))}
+      />
+    </View>
 
-    <Text style={styles.titleText}>Repeat Section:</Text>
-    <ListSelector
-      data={countOptions}
-      keyExtractor={(item) => item}
-      selected={count}
-      onPress={count => dispatch(setRepeatCount(count))}
-    />
+    <View style={styles.settingItem}>
+      <Text style={styles.titleText}>Repeat Section:</Text>
+      <ListSelector
+        data={countOptions}
+        keyExtractor={(item) => item}
+        selected={count}
+        onPress={count => dispatch(setRepeatCount(count))}
+      />
+    </View>
 
-    <FontAwesome style={styles.settingIcon} name="gear" size={40}
+    <FontAwesome style={styles.settingIcon} name="gear" size={60}
     color={colors.lightBlue} onPress={() => {setExpanded(p => !p)}} />
   </View>
 
   else return <View style={styles.settingSelector}>
-    <FontAwesome style={styles.settingIcon} name="gear" size={40}
+    <FontAwesome style={styles.settingIcon} name="gear" size={60}
     color={colors.lightBlue} onPress={() => {setExpanded(p => !p)}} />
   </View>
 })
@@ -75,7 +81,8 @@ function ListSelector({data, renderItem, onPress, selected, ...props}) {
       onShowUnderlay={separators.highlight}
       onHideUnderlay={separators.unhighlight}
       activeOpacity={.6}
-      style={{opacity: (item == selected ? 1 : .2)}}
+      extraData={selected}
+      style={[styles.settingListItem, {opacity: (item == selected ? 1 : .2)}]}
     >
       <View>
         <Text style={styles.text}>{String(item)}</Text>
