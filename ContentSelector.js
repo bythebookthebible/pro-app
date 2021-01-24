@@ -5,13 +5,13 @@ import {styles, colors} from './styles'
 import { useDispatch, useSelector } from 'react-redux';
 import { useFirestoreConnect } from 'react-redux-firebase';
 import { scriptureFromKey } from './util';
-import { getCurrentModule, setStartVerse } from './reducer'
+import { getCurrentModule, setStartVerse, showModuleChooser } from './reducer'
 import NestedListView, {NestedRow} from 'react-native-nested-listview'
 import spacer from './spacer.svg'
 
 export const ContentSelector = React.forwardRef((props, ref) => {
-  let [expanded, setExpanded] = useState(false)
   let dispatch = useDispatch()
+  let expanded = useSelector(state => state.visual.showModuleChooser)
 
   useFirestoreConnect([{collection:'memoryResources_02', storeAs:'memoryResources'}])
   let resources = useSelector(state => state.firestore.data.memoryResources)
@@ -52,7 +52,7 @@ export const ContentSelector = React.forwardRef((props, ref) => {
   // keep current selection key in redux, but get all info for that key from resources
   // display curItem == currently playing module not currently selected module
   let curItem = useSelector( state => getCurrentModule(state))
-  
+
   let selectorList = <View style={[styles.contentSelector, {left: expanded ? 0 : '-100%'}]}>
     <NestedListView 
       data={data}
@@ -61,7 +61,6 @@ export const ContentSelector = React.forwardRef((props, ref) => {
       onNodePressed={(node) => {
         if(node.value) {
           dispatch(setStartVerse(node.value))
-          setExpanded(false)
         }
       }}
       renderNode={(node, level) => (<View>
@@ -83,7 +82,7 @@ export const ContentSelector = React.forwardRef((props, ref) => {
     />
   </View>
 
-  let title = <Pressable onPress={() => {setExpanded(e => !e)}}>
+  let title = <Pressable onPress={() => dispatch(showModuleChooser(!expanded))}>
     <View style={styles.contentTitle}>
       <Text style={[styles.titleText]}>
         { curItem ? `${curItem.book} ${curItem.chapter}:${curItem.startVerse}-${curItem.endVerse}` : '' }

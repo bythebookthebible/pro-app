@@ -3,7 +3,7 @@ import { Text, View, FlatList, TouchableOpacity, useWindowDimensions } from 'rea
 import { FontAwesome } from '@expo/vector-icons'
 import {styles, colors} from './styles'
 import { useDispatch, useSelector } from "react-redux";
-import { setRepeatCount, setBlockSize } from './reducer';
+import { setRepeatCount, setBlockSize, showSettings } from './reducer';
 import _ from 'lodash'
 
 
@@ -19,9 +19,8 @@ function iconMenu({children, icon, ...props}) {
 }
 
 export const SettingSelector = React.forwardRef((props, ref) => {
-  let [expanded, setExpanded] = useState(false)
-
   let dispatch = useDispatch()
+  let expanded = useSelector(state => state.visual.showSettings)
   let size = useSelector(state => state.settings.blockUnitSize)
   let count = useSelector(state => state.settings.blockRepeatCount)
   let {width} = useWindowDimensions()
@@ -52,12 +51,12 @@ export const SettingSelector = React.forwardRef((props, ref) => {
     </View>
 
     <FontAwesome style={styles.settingIcon} name="gear" size={60}
-    color={colors.lightBlue} onPress={() => {setExpanded(p => !p)}} />
+    color={colors.lightBlue} onPress={() => dispatch(showSettings(!expanded))} />
   </View>
 
   else return <View style={styles.settingSelector}>
     <FontAwesome style={styles.settingIcon} name="gear" size={60}
-    color={colors.lightBlue} onPress={() => {setExpanded(p => !p)}} />
+    color={colors.lightBlue} onPress={() => dispatch(showSettings(!expanded))} />
   </View>
 })
 

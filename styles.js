@@ -12,6 +12,8 @@ colors.primary = colors.lightBlue;
 
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 40 : StatusBar.currentHeight;
 
+const defaultFontSize = 20
+
 export const styles = StyleSheet.create({
   outerContainer: {
     flex: 1,
@@ -23,19 +25,19 @@ export const styles = StyleSheet.create({
   text: {
     fontFamily: 'Helvetica-Light',
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: defaultFontSize,
   },
   titleText: {
     fontFamily: 'Helvetica',
     textAlign: 'center',
     fontWeight: 'bold',
-    fontSize: 24,
+    fontSize: defaultFontSize,
   },
 
   // content selector
   contentTitle: {
-    paddingTop: 20 + (STATUSBAR_HEIGHT || 0),
-    paddingBottom: 20,
+    paddingTop: defaultFontSize + (STATUSBAR_HEIGHT || 0),
+    paddingBottom: defaultFontSize,
     alignSelf: 'stretch',
     backgroundColor: 'white',
   },
@@ -53,12 +55,12 @@ export const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
     textAlign: 'left',
     fontWeight: 'bold',
-    fontSize: 24,
+    fontSize: defaultFontSize,
   },
   listEntry: {
-    fontFamily: 'Helvetica',
+    fontFamily: 'Helvetica-Light',
     textAlign: 'left',
-    fontSize: 24,
+    fontSize: defaultFontSize,
   },
   listRow: {
     flexDirection: 'row',
@@ -90,7 +92,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: defaultFontSize,
   },
   listSelector: {
     height: 60,
@@ -110,10 +112,10 @@ export const styles = StyleSheet.create({
   },
   playCircle: {
     backgroundColor: '#fffc', 
-    width:120, height:120,
-    borderRadius: 60,
-    marginTop:-60, marginBottom:-60,
-    paddingVertical:60,
+    width:80, height:80,
+    borderRadius: 40,
+    marginTop:-40, marginBottom:-40,
+    paddingVertical:40,
     alignItems: 'center',
   },
 });

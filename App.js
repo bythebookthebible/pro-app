@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit'
 import { Provider } from 'react-redux'
@@ -8,13 +8,13 @@ import { createFirestoreInstance, constants as rfConstants } from 'redux-firesto
 import { ReactReduxFirebaseProvider, getFirebase, actionTypes as rrfActionTypes } from 'react-redux-firebase'
 
 import { firebase } from './firebase'
-import createRootReducer from './reducer'
+import createRootReducer, { resetSelection } from './reducer'
 
-import {styles, colors} from './styles'
+import { styles } from './styles'
 
-import {ContentSelector} from './ContentSelector'
-import {SettingSelector} from './SettingSelector'
-import {MediaPlayer} from './MediaPlayer'
+import { ContentSelector } from './ContentSelector'
+import { SettingSelector } from './SettingSelector'
+import { MediaPlayer } from './MediaPlayer'
 
 // configure store
 const middleware = [
@@ -56,15 +56,16 @@ const rrfProps = {
 export default function App(props) {
   return <Provider store={store}>
     <ReactReduxFirebaseProvider {...rrfProps}>
-      <View style={styles.outerContainer}>
-        <StatusBar translucent />
-        <ContentSelector />
-        <MediaPlayer />
-        <SettingSelector />
-      </View>
+      <Pressable onPress={() => store.dispatch(resetSelection())} style={styles.outerContainer}>
+          <StatusBar translucent />
+          <ContentSelector />
+          <MediaPlayer />
+          <SettingSelector />
+      </Pressable>
     </ReactReduxFirebaseProvider>
   </Provider>
 }
+
 
 // // renders phone status bar, and blocks that region of the screen
 // function MyStatusBar({backgroundColor, ...props}) {

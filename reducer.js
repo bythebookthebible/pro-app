@@ -3,10 +3,15 @@ import { firestoreReducer } from 'redux-firestore'
 import { firebaseReducer } from 'react-redux-firebase'
 import { valueAfter } from './util'
 
-export const setBlockSize = createAction('SET_BLOCK_SIZE')
-export const setRepeatCount = createAction('SET_REPEAT_COUNT')
+export const showSettings = createAction('VISUAL/SHOW_SETTINGS')
+export const showModuleChooser = createAction('VISUAL/SHOW_MODULE_CHOOSER')
+export const resetSelection = createAction('VISUAL/RESET_SELECTIONS')
+export const playMedia = createAction('VISUAL/PLAYING_MEDIA')
 
-export const setStartVerse = createAsyncThunk('SET_START_VERSE', (key, thunk) => {
+export const setBlockSize = createAction('SETTINGS/SET_BLOCK_SIZE')
+export const setRepeatCount = createAction('SETTINGS/SET_REPEAT_COUNT')
+
+export const setStartVerse = createAsyncThunk('SET_START_MODULE', (key, thunk) => {
   // settings.blockUnitSize needed for player reducer
   let settings = thunk.getState().settings
   return {key, settings}
@@ -22,7 +27,7 @@ export const nextBlock = createAsyncThunk('PLAYER/NEXT_BLOCK', (arg, thunk) => {
   return {settings, measuresInModule, ...arg}
 })
 
-const defaultBlockUnitSize = 3
+const defaultBlockUnitSize = 4
 
 export function getCurrentModule(state) {
   let resources = state.firestore.data.memoryResources
@@ -43,11 +48,30 @@ export default function createRootReducer() {
     firestore: firestoreReducer, // firestore is seperate
 
     // content selector
-    content: createReducer('18-001-001-006', { // default starting module
+    content: createReducer('58-001-001-004', { // default starting module
       [setStartVerse.fulfilled]: (state, action) => {
         console.log(action)
         return action.payload.key
       }
+    }),
+
+    // visual state
+    visual: combineReducers({
+      showSettings: createReducer(false, {
+        [showSettings]: (state, action) => action.payload,
+        [playMedia]: (state, action) => action.payload ? false : state,
+        [resetSelection]: () => false,
+      }),
+      showModuleChooser: createReducer(false, {
+        [showModuleChooser]: (state, action) => action.payload,
+        [playMedia]: (state, action) => action.payload ? false : state,
+        [setStartVerse.fulfilled]: () => false,
+        [resetSelection]: () => false,
+      }),
+      playMedia: createReducer(false, {
+        [playMedia]: (state, action) => action.payload,
+        [setStartVerse.fulfilled]: () => false,
+      })
     }),
 
     // settings selector

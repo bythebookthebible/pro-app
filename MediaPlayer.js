@@ -11,11 +11,11 @@ import { useFirestoreConnect } from 'react-redux-firebase';
 import { Audio } from 'expo-av'
 
 // import poster from './icon.png'
-import { getCurrentModule, nextBlock } from './reducer';
+import { getCurrentModule, nextBlock, playMedia } from './reducer';
 
 
 export function MediaPlayer(props) {
-  let [paused, setPaused] = useState(true)
+  let playing = useSelector(state => state.visual.playMedia)
   let dispatch = useDispatch()
 
   // cur video source url
@@ -87,17 +87,16 @@ export function MediaPlayer(props) {
   return <>
     <View style={styles.mediaPlayer}>
       <Pressable onPress={() => {
-        let p = !paused
         if(sound) {
-          if(p) sound.pauseAsync()
+          if(playing) sound.pauseAsync()
           else sound.playAsync()
         }
-        setPaused(p)
+        dispatch(playMedia(!playing))
       }}>
         <View style={styles.playCircle}>
-          <FontAwesome name={paused ? "play" : "pause"}
-            style={{marginTop:-25, marginBottom:-25, marginLeft: (paused ? 11 : 0)}}
-            size={50} color={colors.primary} />
+          <FontAwesome name={playing ? "pause" : "play"}
+            style={{marginTop:-15, marginBottom:-15, marginLeft: (playing ? 0 : 8)}}
+            size={30} color={colors.primary} />
         </View>
       </Pressable>
       <Waves />
@@ -132,7 +131,7 @@ function Waves(props) {
   const aspect = 2
 
   return <View {...props} style={{
-      zIndex: -1, pointerEvents: 'none',
+      zIndex: -10, pointerEvents: 'none',
       width: width, height: width / aspect, 
       marginTop: -width / aspect / 2,
       marginBottom: -width / aspect / 2,
