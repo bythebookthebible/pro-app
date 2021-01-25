@@ -12,7 +12,7 @@ colors.primary = colors.lightBlue;
 
 const STATUSBAR_HEIGHT = Platform.OS === 'ios' ? 40 : StatusBar.currentHeight;
 
-const defaultFontSize = 20
+const defaultFontSize = 24
 
 export const styles = StyleSheet.create({
   outerContainer: {

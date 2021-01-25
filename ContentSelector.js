@@ -67,7 +67,7 @@ export const ContentSelector = React.forwardRef((props, ref) => {
         <NestedRow level={level} paddingLeftIncrement={30} style={curItem && node.value == curItem.key
             ? {backgroundColor: colors.lightBlue} : {}}>
           <View style={styles.listRow}>
-            <Text style={level == 1 ? styles.listTitle : styles.listEntry}>
+            <Text style={level < 3 ? styles.listTitle : styles.listEntry}>
               {node.title}
             </Text>
 

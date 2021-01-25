@@ -31,22 +31,22 @@ export const SettingSelector = React.forwardRef((props, ref) => {
   if(expanded) return <View style={[styles.settingSelectorExpanded,
     {justifyContent: width < 600 ? 'flex-start' : 'flex-end'}]}>
     <View style={styles.settingItem}>
-      <Text style={styles.titleText}>Section Size:</Text>
-      <ListSelector
-        data={sizeOptions}
-        keyExtractor={(item) => item}
-        selected={size}
-        onPress={size => dispatch(setBlockSize(size))}
-      />
-    </View>
-
-    <View style={styles.settingItem}>
       <Text style={styles.titleText}>Repeat Section:</Text>
       <ListSelector
         data={countOptions}
         keyExtractor={(item) => item}
         selected={count}
         onPress={count => dispatch(setRepeatCount(count))}
+      />
+    </View>
+
+    <View style={styles.settingItem}>
+      <Text style={styles.titleText}>Section Size:</Text>
+      <ListSelector
+        data={sizeOptions}
+        keyExtractor={(item) => item}
+        selected={size}
+        onPress={size => dispatch(setBlockSize(size))}
       />
     </View>
 

@@ -57,7 +57,7 @@ export default function App(props) {
   return <Provider store={store}>
     <ReactReduxFirebaseProvider {...rrfProps}>
       <Pressable onPress={() => store.dispatch(resetSelection())} style={styles.outerContainer}>
-          <StatusBar translucent />
+          <StatusBar barStyle="light-content" />
           <ContentSelector />
           <MediaPlayer />
           <SettingSelector />
